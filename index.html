@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#243746">
+<title>Factory Empire – Prototyp 0.1</title>
+<style>
+:root{--ink:#243746;--muted:#71808b;--panel:#fff;--bg:#e9eef0;--blue:#3d7894;--green:#4f8b67;--gold:#d5a64a}
+*{box-sizing:border-box} body{margin:0;font-family:Verdana,Arial,sans-serif;background:var(--bg);color:var(--ink);overflow:hidden}
+header{height:64px;background:#243746;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 18px;gap:12px;box-shadow:0 2px 8px #0002}
+.brand{font-weight:700;letter-spacing:.4px}.brand small{display:block;color:#b8c8d0;font-size:10px;font-weight:400;margin-top:3px}
+.stats{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.stat{background:#ffffff16;border:1px solid #ffffff20;border-radius:8px;padding:7px 10px;font-size:12px;white-space:nowrap}.stat b{color:#f3d48e;margin-left:5px}
+main{height:calc(100dvh - 64px);display:grid;grid-template-columns:220px minmax(0,1fr) 250px;gap:12px;padding:12px;min-height:0}
+.panel{background:var(--panel);border:1px solid #d7e0e4;border-radius:12px;box-shadow:0 3px 12px #2037470c;min-height:0;overflow:auto}
+.panel h2{font-size:13px;margin:0;padding:14px 14px 10px;border-bottom:1px solid #edf0f2}
+.tools{padding:10px;display:grid;gap:8px}.tool{border:1px solid #dce4e7;background:#fbfcfc;border-radius:9px;padding:10px;text-align:left;color:var(--ink);cursor:pointer;font:inherit}.tool.active{border-color:var(--blue);background:#eaf3f7;box-shadow:inset 3px 0 var(--blue)}.tool strong{display:block;font-size:12px}.tool span{display:block;font-size:10px;color:var(--muted);margin-top:4px}
+.hint{font-size:10px;color:var(--muted);line-height:1.5;padding:4px 13px 14px}
+.stage{position:relative;overflow:hidden;border-radius:12px;background:linear-gradient(#dce9eb 0 55%,#d2dfd7 55%);border:1px solid #cbd8da;min-height:0}
+.stage:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,#fff5,transparent 65%);pointer-events:none}
+canvas{width:100%;height:100%;display:block;touch-action:none}
+.overlay{position:absolute;left:12px;top:12px;background:#ffffffdf;border:1px solid #fff;border-radius:9px;padding:8px 10px;font-size:11px;box-shadow:0 2px 8px #0001}
+.controls{position:absolute;right:12px;top:12px;display:flex;gap:6px}
+button{font:inherit;cursor:pointer}.mini{border:1px solid #cbd7dc;background:#fff;border-radius:8px;padding:8px 10px;color:var(--ink);font-size:11px;box-shadow:0 2px 5px #0001}
+.bottom{position:absolute;bottom:12px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:end;gap:8px;pointer-events:none}.toast{background:#243746eF;color:white;padding:9px 12px;border-radius:8px;font-size:11px;max-width:75%;pointer-events:none}
+.details{padding:12px;font-size:11px;line-height:1.55}.details .label{color:var(--muted);font-size:10px;margin-top:10px}.details strong{font-size:13px}.meter{height:7px;background:#edf1f2;border-radius:8px;overflow:hidden;margin:5px 0 9px}.meter i{display:block;height:100%;background:var(--green);width:35%}
+.action{width:100%;border:0;border-radius:8px;background:var(--blue);color:white;padding:10px;margin-top:10px;font-weight:700;font-size:11px}.secondary{background:#eef3f5;color:var(--ink);border:1px solid #d7e0e4}
+@media(max-width:850px){main{grid-template-columns:180px minmax(0,1fr);grid-template-rows:minmax(0,1fr) 160px}.right{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr}.right h2{grid-column:1/-1}.details{padding:8px 12px}.tools{grid-template-columns:1fr 1fr}.tool{padding:8px}}
+@media(max-width:560px){header{height:58px;padding:0 10px}.brand{font-size:13px}.brand small{font-size:9px}.stats{gap:4px}.stat{font-size:10px;padding:6px}.stat:nth-child(3){display:none}main{height:calc(100dvh - 58px);display:flex;flex-direction:column;padding:7px;gap:7px}.stage{order:1;flex:1;min-height:260px}.left{order:2;flex:none}.left h2{padding:9px 12px}.tools{display:flex;overflow-x:auto;padding:7px}.tool{min-width:125px}.hint{display:none}.right{order:3;flex:none;max-height:150px;display:block}.right h2{padding:9px 12px}.details{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;padding:7px 12px}.details .label{margin-top:4px}.details .action{margin-top:5px}.overlay{font-size:10px;top:7px;left:7px}.controls{top:7px;right:7px}.mini{padding:7px 8px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand">FACTORY EMPIRE <small>Aufbau- & Wirtschaftssimulation · Prototyp 0.1</small></div>
+ <div class="stats"><div class="stat">Kapital <b id="money">10.000 €</b></div><div class="stat">Mitarbeiter <b id="staff">2</b></div><div class="stat">Tag <b id="day">1</b></div><div class="stat">Produktion <b id="made">0</b></div></div>
+</header>
+<main>
+ <section class="panel left">
+  <h2>Bauen & platzieren</h2>
+  <div class="tools">
+   <button class="tool active" data-kind="select"><strong>↖ Auswählen</strong><span>Objekt anklicken</span></button>
+   <button class="tool" data-kind="hall"><strong>▧ Produktionshalle</strong><span>1.200 € · Gebäude</span></button>
+   <button class="tool" data-kind="machine"><strong>⚙ Abfüllmaschine</strong><span>800 € · Produktion</span></button>
+   <button class="tool" data-kind="storage"><strong>▤ Rohstofflager</strong><span>500 € · Lager</span></button>
+   <button class="tool" data-kind="office"><strong>▦ Büro</strong><span>650 € · Verwaltung</span></button>
+  </div>
+  <div class="hint">Tipp: Wähle ein Objekt und tippe auf ein freies Rasterfeld. Maschinen lassen sich nach dem Platzieren drehen.</div>
+ </section>
+ <section class="stage">
+  <canvas id="world"></canvas>
+  <div class="overlay">Grundstück · Standort 01</div>
+  <div class="controls"><button class="mini" id="rotate">↻ Drehen</button><button class="mini" id="zoomIn">＋</button><button class="mini" id="zoomOut">－</button></div>
+  <div class="bottom"><div class="toast" id="toast">Willkommen! Errichte deine erste Produktionshalle.</div><button class="mini" id="nextDay" style="pointer-events:auto">▶ Nächster Tag</button></div>
+ </section>
+ <section class="panel right">
+  <h2>Objekt & Unternehmen</h2>
+  <div class="details" id="details"><strong>Dein Unternehmen</strong><div class="label">Aufgabe</div><div>Baue eine erste Produktionshalle und richte deine Produktion ein.</div><div class="label">Unternehmensruf</div><div><b>50 / 100</b><div class="meter"><i style="width:50%"></i></div></div><div class="label">Hinweis</div><div>Dies ist ein visueller und funktionaler Grundprototyp. Die Wirtschaftssimulation folgt schrittweise.</div></div>
+ </section>
+</main>
+<script>
+const canvas=document.getElementById('world'),ctx=canvas.getContext('2d');
+const N=11, tileW=62, tileH=31; let zoom=1, offsetX=0,offsetY=0,selectedTool='select',rotation=0,money=10000,day=1,made=0,selected=null;
+const objects=[]; const colors={hall:'#b8c8ce',machine:'#d6a64a',storage:'#83a9b2',office:'#8da98d'};
+function size(){const r=canvas.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);canvas.width=r.width*d;canvas.height=r.height*d;ctx.setTransform(d,0,0,d,0,0);draw()}
+function origin(){return {x:canvas.clientWidth/2+offsetX,y:canvas.clientHeight*.47+offsetY}}
+function iso(x,y){const o=origin();return {x:o.x+(x-y)*tileW*.5*zoom,y:o.y+(x+y)*tileH*.5*zoom}}
+function toGrid(px,py){const o=origin(),a=(px-o.x)/(tileW*.5*zoom),b=(py-o.y)/(tileH*.5*zoom);return {x:Math.round((a+b)/2),y:Math.round((b-a)/2)}}
+function poly(points,fill,stroke='#ffffff70'){ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle=stroke;ctx.lineWidth=1;ctx.stroke()}
+function diamond(x,y){const p=iso(x,y),w=tileW*zoom/2,h=tileH*zoom/2;poly([{x:p.x,y:p.y-h},{x:p.x+w,y:p.y},{x:p.x,y:p.y+h},{x:p.x-w,y:p.y}],(x+y)%2?'#d7e3d9':'#d1dfd4','#ffffff55')}
+function drawObject(o){const p=iso(o.x,o.y),w=tileW*zoom*.36,h=tileH*zoom*.34,hh=(o.kind==='hall'?30:o.kind==='machine'?23:19)*zoom;
+ const c=colors[o.kind];poly([{x:p.x,y:p.y-h-hh},{x:p.x+w,y:p.y-h/2-hh},{x:p.x,y:p.y-hh},{x:p.x-w,y:p.y-h/2-hh}],o.kind==='hall'?'#e2eaed':c);
+ poly([{x:p.x-w,y:p.y-h/2-hh},{x:p.x,y:p.y-hh},{x:p.x,y:p.y+h-hh},{x:p.x-w,y:p.y+h/2-hh}],o.kind==='hall'?'#9aafb8':c);
+ poly([{x:p.x+w,y:p.y-h/2-hh},{x:p.x,y:p.y-hh},{x:p.x,y:p.y+h-hh},{x:p.x+w,y:p.y+h/2-hh}],o.kind==='hall'?'#829ba6':c);
+ ctx.fillStyle='#243746';ctx.font=`${12*zoom}px Verdana`;ctx.textAlign='center';ctx.fillText(o.kind==='hall'?'H':o.kind==='machine'?'⚙':o.kind==='storage'?'L':'B',p.x,p.y-hh+4*zoom);
+ if(selected===o){ctx.strokeStyle='#e2a93b';ctx.lineWidth=2;ctx.strokeRect(p.x-20*zoom,p.y-hh-25*zoom,40*zoom,45*zoom)}
+}
+function draw(){if(!canvas.width)return;const w=canvas.clientWidth,h=canvas.clientHeight;ctx.clearRect(0,0,w,h);for(let s=0;s<2*N-1;s++)for(let x=0;x<N;x++){let y=s-x;if(y>=0&&y<N)diamond(x,y)}
+ objects.slice().sort((a,b)=>(a.x+a.y)-(b.x+b.y)).forEach(drawObject)}
+function say(t){document.getElementById('toast').textContent=t}
+function refresh(){document.getElementById('money').textContent=money.toLocaleString('de-DE')+' €';document.getElementById('day').textContent=day;document.getElementById('made').textContent=made;document.getElementById('staff').textContent=2+objects.filter(o=>o.kind==='machine').length; if(selected){document.getElementById('details').innerHTML=`<strong>${label(selected.kind)}</strong><div class="label">Position</div><div>Raster ${selected.x+1} / ${selected.y+1}</div><div class="label">Ausrichtung</div><div>${selected.rot*90}°</div><button class="action secondary" id="turnObj">Objekt drehen ↻</button>`;document.getElementById('turnObj').onclick=rotateSelected}else{document.getElementById('details').innerHTML='<strong>Dein Unternehmen</strong><div class="label">Aufgabe</div><div>Baue eine Produktionshalle und richte deine erste Produktionslinie ein.</div><div class="label">Unternehmensruf</div><div><b>50 / 100</b><div class="meter"><i style="width:50%"></i></div></div><div class="label">Hinweis</div><div>Wähle links ein Objekt und platziere es auf dem Grundstück.</div>'}}
+function label(k){return ({hall:'Produktionshalle',machine:'Abfüllmaschine',storage:'Rohstofflager',office:'Büro'})[k]||k}
+document.querySelectorAll('.tool').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tool').forEach(x=>x.classList.remove('active'));b.classList.add('active');selectedTool=b.dataset.kind;selected=null;refresh();say(selectedTool==='select'?'Objekt auswählen.':'Platzierungsmodus: '+label(selectedTool))});
+function rotateSelected(){if(!selected)return;selected.rot=(selected.rot+1)%4;draw();refresh()}
+document.getElementById('rotate').onclick=rotateSelected;
+canvas.addEventListener('pointerdown',e=>{const r=canvas.getBoundingClientRect(),g=toGrid(e.clientX-r.left,e.clientY-r.top);if(g.x<0||g.y<0||g.x>=N||g.y>=N)return;const hit=objects.find(o=>o.x===g.x&&o.y===g.y);if(selectedTool==='select'){selected=hit||null;refresh();draw();return}if(hit){say('Dieses Feld ist bereits belegt.');return}const costs={hall:1200,machine:800,storage:500,office:650};if(money<costs[selectedTool]){say('Nicht genügend Kapital.');return}money-=costs[selectedTool];const obj={x:g.x,y:g.y,kind:selectedTool,rot:rotation};objects.push(obj);selected=obj;draw();refresh();say(label(selectedTool)+' wurde gebaut.');});
+document.getElementById('zoomIn').onclick=()=>{zoom=Math.min(1.6,zoom*1.12);draw()};document.getElementById('zoomOut').onclick=()=>{zoom=Math.max(.65,zoom/1.12);draw()};
+document.getElementById('nextDay').onclick=()=>{day++;let machines=objects.filter(o=>o.kind==='machine').length,halls=objects.filter(o=>o.kind==='hall').length;if(machines&&halls){let units=machines*80;made+=units;money+=units*2-120; say(`Tag ${day}: ${units} Dosen produziert. Verkaufserlös verbucht (vereinfachte Testsimulation).`)}else say(`Tag ${day}: Noch keine vollständige Produktionslinie. Baue eine Halle und eine Abfüllmaschine.`);refresh()};
+let dragging=false,last=null;canvas.addEventListener('pointerdown',e=>{if(e.button===1){dragging=true;last={x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId)}});canvas.addEventListener('pointermove',e=>{if(dragging&&last){offsetX+=e.clientX-last.x;offsetY+=e.clientY-last.y;last={x:e.clientX,y:e.clientY};draw()}});canvas.addEventListener('pointerup',()=>{dragging=false;last=null});
+window.addEventListener('resize',size);size();refresh();
+</script>
+</body>
+</html>
